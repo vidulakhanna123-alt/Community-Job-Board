@@ -1,0 +1,55 @@
+# ---- What to look for ----
+titles:            # a job title must match at least one
+  - community manager
+  - community operations
+  - community ops
+  - community specialist
+  - community engagement
+  - community strategy
+  - community program
+  - community moderator
+  - customer community
+  - developer community
+  - community success
+  - community lead
+exclude_titles:    # removes false matches (apartments, care work, etc.)
+  - apartment|property|resident|housing|nurse|care worker|therapist|senior living|hoa|homeowner
+skills:            # each one found in the job text adds to the match score
+  - higher logic
+  - vanilla
+  - khoros
+  - zendesk
+  - salesforce
+  - gamification
+  - moderation
+  - discourse
+  - circle
+  - bevy
+  - jira
+  - asana
+  - community analytics
+  - advocacy
+  - b2b
+salary_usd: {min: 51000, max: 94000}
+
+# ---- Where to look ----
+# Company boards. Find a token in the careers-page URL:
+#   boards.greenhouse.io/<token>   jobs.lever.co/<token>   jobs.ashbyhq.com/<token>
+# Tokens that 404 are skipped with a warning in the Actions log - fix or delete them.
+greenhouse: [databricks, gitlab, discord, figma]
+lever: []
+ashby: [notion, supabase, zapier]
+
+remoteok: true
+remotive: true
+wwr_feeds:
+  - https://weworkremotely.com/remote-jobs.rss
+  - https://weworkremotely.com/categories/remote-customer-support-jobs.rss
+
+# Companies with no public feed (SolarWinds uses iCIMS, for example):
+# create a Google Alert with "Deliver to: RSS feed" and paste each feed URL here.
+# Query idea: "community manager" OR "community operations" site:uscareers-solarwinds.icims.com
+alert_feeds: []
+
+# Companies that get a score bonus
+priority_companies: [solarwinds, higher logic, databricks, gitlab, notion, discord, figma, zapier, supabase]

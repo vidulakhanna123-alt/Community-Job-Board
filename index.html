@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community jobs, remote from India</title>
+<style>
+:root{--bg:#f2f5f7;--surface:#fff;--ink:#17283a;--muted:#5b6b7b;--line:#d5dde4;--accent:#0b6b73;--good:#1f7a4d;--warn:#a85d00;--bad:#a63a3a}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a24;--surface:#16242f;--ink:#e6edf3;--muted:#93a4b3;--line:#27384a;--accent:#4fc0c9;--good:#5cc98e;--warn:#e0a34a;--bad:#e07a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 16px 60px}
+h1{font:600 1.7rem/1.2 Georgia,"Iowan Old Style",serif;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.bar input,.bar select{padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit}
+.bar input{flex:1 1 220px}
+.job{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:56px 1fr;gap:14px}
+.job.maybe{border-left-color:var(--warn)}.job.no{border-left-color:var(--bad)}
+.score{font:600 1.5rem Georgia,serif;text-align:center;font-variant-numeric:tabular-nums}
+.score small{display:block;font:.7rem "Segoe UI",sans-serif;color:var(--muted)}
+.job h2{font-size:1.05rem;margin:0}.job h2 a{color:var(--ink);text-decoration:none}.job h2 a:hover,.job h2 a:focus-visible{text-decoration:underline;color:var(--accent)}
+.meta{color:var(--muted);font-size:.9rem;margin:2px 0 8px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font-size:.8rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px}
+.tag.yes,.tag.in{color:var(--good);border-color:var(--good)}.tag.maybe,.tag.above{color:var(--warn);border-color:var(--warn)}.tag.no,.tag.below{color:var(--bad);border-color:var(--bad)}
+.tags select{margin-left:auto;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;font-size:.85rem}
+details{margin-top:28px;color:var(--muted)}summary{cursor:pointer;color:var(--ink)}
+table{border-collapse:collapse;margin-top:8px;font-size:.9rem}td,th{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+@media (max-width:520px){.job{grid-template-columns:1fr}.score{text-align:left}}
+</style>
+</head>
+<body>
+<main>
+<h1>Community jobs, remote from India</h1>
+<p class="sub" id="stamp">Loading…</p>
+<div class="bar">
+  <input id="q" type="search" placeholder="Search title, company, skill" aria-label="Search">
+  <select id="elig" aria-label="India eligibility"><option value="ok">Eligible or maybe</option><option value="yes">Eligible only</option><option value="all">Show all</option></select>
+  <select id="status" aria-label="Status"><option value="">Any status</option><option>New</option><option>Saved</option><option>Applied</option><option>Interview</option><option>Rejected</option></select>
+  <select id="min" aria-label="Minimum score"><option value="0">Any score</option><option value="50">50+</option><option value="70">70+</option></select>
+</div>
+<div id="list"></div>
+<details><summary>Team core hours in India time (9 a.m. to 1 p.m. team time)</summary>
+<table><tr><th>Team</th><th>India time</th></tr>
+<tr><td>US Eastern</td><td>7:30–11:30 p.m. (US standard time, now) · 6:30–10:30 p.m. (US daylight time)</td></tr>
+<tr><td>US Pacific</td><td>10:30 p.m.–2:30 a.m. (standard) · 9:30 p.m.–1:30 a.m. (daylight)</td></tr>
+<tr><td>United Kingdom</td><td>2:30–6:30 p.m. (winter) · 1:30–5:30 p.m. (summer)</td></tr>
+<tr><td>Central Europe</td><td>1:30–5:30 p.m. (winter) · 12:30–4:30 p.m. (summer)</td></tr></table></details>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let jobs=[],state={};
+try{state=JSON.parse(localStorage.getItem("jobstatus")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("jobstatus",JSON.stringify(state))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money=j=>j.salary_min?`$${Math.round(j.salary_min/1000)}k–$${Math.round(j.salary_max/1000)}k`:"Salary not listed";
+function render(){
+  const q=$("q").value.toLowerCase(),el=$("elig").value,st=$("status").value,mn=+$("min").value;
+  const rows=jobs.filter(j=>{
+    const s=state[j.url]||"New";
+    return (el==="all"||(el==="yes"?j.india_eligible==="yes":j.india_eligible!=="no"))
+      &&(!st||s===st)&&j.score>=mn&&(!q||(j.title+j.company+j.skills.join(" ")).toLowerCase().includes(q));
+  });
+  $("list").innerHTML=rows.length?rows.map(j=>{
+    const s=state[j.url]||"New";
+    return `<article class="job ${j.india_eligible}"><div class="score">${j.score}<small>match</small></div><div>
+    <h2><a href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.title)}</a></h2>
+    <div class="meta">${esc(j.company)} · ${esc(j.location||"Location not stated")} · ${esc(j.source)}${j.posted?" · "+esc(j.posted):""}</div>
+    <div class="tags"><span class="tag ${j.india_eligible}">India: ${j.india_eligible}</span><span class="tag ${j.salary_fit}">${money(j)}</span>
+    ${j.skills.slice(0,5).map(x=>`<span class="tag">${esc(x)}</span>`).join("")}
+    <select data-u="${esc(j.url)}" aria-label="Application status">${["New","Saved","Applied","Interview","Rejected"].map(o=>`<option${o===s?" selected":""}>${o}</option>`).join("")}</select></div></div></article>`}).join("")
+    :'<div class="empty">No jobs match these filters. Try “Show all” or lower the score.</div>';
+}
+$("list").addEventListener("change",e=>{if(e.target.dataset.u){state[e.target.dataset.u]=e.target.value;save();render()}});
+["q","elig","status","min"].forEach(id=>$(id).addEventListener("input",render));
+fetch("jobs.json").then(r=>r.json()).then(d=>{jobs=d.jobs;
+  $("stamp").textContent=d.updated?`${jobs.length} jobs · updated ${new Date(d.updated).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}`:"No data yet. Run the update workflow once.";render()})
+ .catch(()=>{$("stamp").textContent="Could not load jobs.json"});
+</script>
+</body>
+</html>
